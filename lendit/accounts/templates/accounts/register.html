@@ -1,69 +1,86 @@
 {% extends "base.html" %}
-{% block title %}Create an Account{% endblock title %} 
+{% block title %}Create an Account{% endblock title %}
 {% block content %}
 
-    <div class="container col-lg-8">
+<div class="container mt-5">
+    <div class="w-75 mx-auto">
+        <h1 class="mb-4 text-center">Create an account</h1>
 
-        <h1>Create an account</h1>
-        
-        <form method="POST" novalidate>
-            {% csrf_token %}
-            <div class="col-lg-8 mb-4">
-                {{ form.email }}
-                {% if form.email.errors %}
-                <div class="invalid-feedback">
-                    {% for error in form.email.errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
 
-            <div class="row">
-                <div class="col-md-4 mb-4">
-                    {{ form.first_name }}
-                    {% if form.first_name.errors %}
-                    <div class="invalid-feedback">
-                        {% for error in form.first_name.errors %}
-                        <p>{{ error }}</p>
-                        {% endfor %}
+                <!-- Form starts here -->
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.email.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
                     </div>
-                    {% endif %}
-                </div>
-                <div class="col-md-4 mb-4">
-                    {{ form.last_name }}
-                    {% if form.last_name.errors %}
-                    <div class="invalid-feedback">
-                        {% for error in form.last_name.errors %}
-                        <p>{{ error }}</p>
-                        {% endfor %}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.first_name.errors %}
+                                <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.last_name.errors %}
+                                <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
-                    {% endif %}
-                </div>
+
+                    <div class="mb-3">
+                        {{ form.password1 }}
+                        {% if form.password1.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.password1.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.password2.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Button aligned with input fields -->
+                    <button type="submit" class="btn btn-primary">Create Account</button>
+                </form>
+
+                <!-- Text aligned with input fields -->
+                <a href="{% url 'accounts:login' %}" class="text-muted text-decoration-none d-block mt-3">
+                    Already have an account?
+                </a>
+
             </div>
-            
-            <div class="col-lg-8 mb-4">
-                {{ form.password1 }}
-                {% if form.password1.errors %}
-                <div class="invalid-feedback">
-                    {% for error in form.password1.errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-            
-            <div class="col-lg-8 mb-4">
-                {{ form.password2 }}
-                {% if form.password2.errors %}
-                <div class="invalid-feedback">
-                    {% for error in form.password2.errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            </div>
-            <button type="submit" class="btn btn-primary">Create Account</button>
-        </form>
+        </div>
     </div>
-        {% endblock content %}
+</div>
+
+{% endblock content %}

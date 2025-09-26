@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock title %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="w-75 mx-auto">
+        <h1 class="mb-4 text-center">Login</h1>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <form method="POST" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.username.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.password }}
+                        {% if form.password.errors %}
+                        <div class="invalid-feedback d-block">
+                            {% for error in form.password.errors %}
+                            <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+                <a href="{% url 'accounts:register' %}" class="text-muted text-decoration-none d-block mt-3">
+                    Need an account?
+                </a>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

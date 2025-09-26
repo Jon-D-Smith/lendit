@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-# Create your models here.
 
 
 class CustomUserManager(BaseUserManager):
+    # Setup createuser with custom fields. The manager handles authentication so this tells it what to expect from out CustomUser as far as unique fields.
     def create_user(self, email, password=None, **extra_fields):
         if not email:
             raise ValueError('The email address you entered is invalid')
@@ -17,9 +17,10 @@ class CustomUserManager(BaseUserManager):
         return user
     
     def create_superuser(self, email, password=None, **extra_fields):
+        # override the default permissions
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-
+        # creating a user with the overridden permissions
         return self.create_user(email, password, **extra_fields)
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -37,7 +38,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     
     REQUIRED_FIELDS = []
 
-
+    # This is the name that will show up in the admin screen
     class Meta:
         verbose_name = 'User'
         verbose_name_plural = 'Users'
