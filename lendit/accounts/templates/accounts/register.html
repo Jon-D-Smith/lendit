@@ -8,8 +8,6 @@
 
         <div class="row justify-content-center">
             <div class="col-lg-8">
-
-                <!-- Form starts here -->
                 <form method="POST" novalidate>
                     {% csrf_token %}
 
@@ -69,11 +67,9 @@
                         {% endif %}
                     </div>
 
-                    <!-- Button aligned with input fields -->
                     <button type="submit" class="btn btn-primary">Create Account</button>
                 </form>
 
-                <!-- Text aligned with input fields -->
                 <a href="{% url 'accounts:login' %}" class="text-muted text-decoration-none d-block mt-3">
                     Already have an account?
                 </a>
