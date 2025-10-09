@@ -54,16 +54,16 @@ class BorrowEvent(models.Model):
         return f"{self.user} borrowed {self.item.name} on {self.borrowed_at.strftime('%Y-%m-%d %H:%M')}"
     
 
-# class InventoryTag(Tag):
-#     class Meta:
-#         proxy = True
-#         app_label = 'inventory'
-#         verbose_name = 'Tag'
-#         verbose_name_plural = 'Tags'
+class InventoryTag(Tag):
+    class Meta:
+        proxy = True
+        app_label = 'inventory'
+        verbose_name = 'Tag'
+        verbose_name_plural = 'Tags'
 
-# class InventoryTaggedItem(TaggedItem):
-#     class Meta:
-#         proxy = True
-#         app_label = 'inventory'
-#         verbose_name = 'Tagged Item'
-#         verbose_name_plural = 'Tagged Items'
+class InventoryTaggedItem(TaggedItem):
+    class Meta:
+        proxy = True
+        app_label = 'inventory'
+        verbose_name = 'Tagged Item'
+        verbose_name_plural = 'Tagged Items'

@@ -2,9 +2,10 @@ from django.contrib import admin
 from django.utils.html import format_html
 
 from django_summernote.admin import SummernoteModelAdmin
+from taggit.admin import TagAdmin
+from taggit.models import Tag, TaggedItem
 
-
-from .models import Item, BorrowEvent
+from .models import Item, BorrowEvent, InventoryTag, InventoryTaggedItem
 from .forms import ItemAdminForm
 
 
@@ -71,5 +72,20 @@ class ItemAdmin(SummernoteModelAdmin):
     display_tags.short_description = 'Tags'
     image_preview.short_description = 'Preview'
 
+@admin.register(InventoryTag)
+class InventoryTagAdmin(TagAdmin):
+    fieldsets = (
+        ('Tag Info', {'fields': ('name','slug')}),
+    )
+
+    def get_inline_instances(self, request, obj=None):
+        return []
+
+# @admin.register(InventoryTaggedItem)
+# class InventoryTaggedItemAdmin(admin.ModelAdmin):
+#     list_display = ['tag', 'content_type', 'object_id']
+
 
 admin.site.register(BorrowEvent)
+
+admin.site.unregister(Tag)
