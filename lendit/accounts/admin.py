@@ -3,6 +3,10 @@ from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from .models import CustomUser
 
+admin.site.site_header = "LendIt Admin"
+admin.site.site_title = 'LendIt Admin'
+admin.site.index_title = "LendIt Site Administration"
+
 @admin.register(CustomUser)
 class CustomUserAdmin(BaseUserAdmin):
     # Which forms admin will use when adding or displaying the user model in the admin site. The display form in this case is also an update form so we

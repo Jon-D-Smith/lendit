@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 from decouple import config
 from pathlib import Path
+import os
 from django.contrib.messages import constants as messages
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -31,13 +32,19 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+        # Django Apps
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+        # Custom Apps
     'accounts.apps.AccountsConfig',
+    'inventory.apps.InventoryConfig',
+        # Third party apps
+    'django_summernote',
+    'taggit',
 
 ]
 
@@ -121,7 +128,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
+
+MEDIA_URL = '/media/'
+
+MEDIAL_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -142,3 +155,57 @@ MESSAGE_TAGS = {
 
 # Our custom user model
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+
+# Summernote settings - https://github.com/lqez/django-summernote
+# SUMMERNOTE_THEME = 'bs4'
+
+SUMMERNOTE_CONFIG = {
+    'iframe': True,
+    
+    'css': (
+        '//stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css',
+        '//cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css',
+        '//cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.css',
+    ),
+
+    'js': (
+        '//code.jquery.com/jquery-3.5.1.min.js',
+        '//cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js',
+        '//cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/10.32.0/js/vendor/jquery.ui.widget.min.js',
+        '//cdnjs.cloudflare.com/ajax/libs/blueimp-file-upload/10.32.0/js/jquery.fileupload.min.js',
+        '//cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.js',
+    ),
+    'attachment_require_authentication': True,
+    'attachment_filesize_limit': 20 * 1024 * 1024,
+    'width' : '900',
+    'height' : '500',
+
+    'summernote': {
+        'toolbar': [
+            ['style', ['style']],
+            ['font', ['bold', 'italic', 'underline', 'clear']],
+            ['fontname', ['fontname']],
+            ['fontsize', ['fontsize']],
+            ['height',['height']],
+            ['color', ['color','clear']],
+            ['misc',['undo', 'redo']],
+            ['para', ['ul', 'ol', 'paragraph',]],
+            ['insert', ['link', 'picture', 'video', 'hr', 'table']],
+            ['view', ['fullscreen', 'codeview', 'help']],
+        ],
+        'fontNames': [
+            'Arial', 'Arial Black', 'Comic Sans MS', 'Courier New',
+            'Times New Roman', 'Verdana', 'Helvetica', 'Georgia', 'Impact'
+        ],
+        'fontSizes': [
+            '8', '9', '10', '11', '12', '14', '16', '18',
+            '20', '24', '28', '32', '36', '48', '64'
+        ],
+    }
+}
+
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024
+# django-taggit Settings - https://django-taggit.readthedocs.io/en/latest/getting_started.html
+TAGGIT_CASE_INSENSITIVE = True
