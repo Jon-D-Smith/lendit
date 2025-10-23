@@ -4,15 +4,14 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('inventory', '0003_rename_checked_in_item_checked_in_at'),
+        ("inventory", "0003_rename_checked_in_item_checked_in_at"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='item',
-            name='image',
-            field=models.ImageField(default='default.jpg', upload_to='item_images/'),
+            model_name="item",
+            name="image",
+            field=models.ImageField(default="default.jpg", upload_to="item_images/"),
         ),
     ]

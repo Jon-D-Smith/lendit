@@ -4,37 +4,37 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('inventory', '0006_alter_borrowevent_options'),
-        ('taggit', '0006_rename_taggeditem_content_type_object_id_taggit_tagg_content_8fc721_idx'),
+        ("inventory", "0006_alter_borrowevent_options"),
+        (
+            "taggit",
+            "0006_rename_taggeditem_content_type_object_id_taggit_tagg_content_8fc721_idx",
+        ),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='InventoryTag',
-            fields=[
-            ],
+            name="InventoryTag",
+            fields=[],
             options={
-                'verbose_name': 'Tag',
-                'verbose_name_plural': 'Tags',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Tag",
+                "verbose_name_plural": "Tags",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('taggit.tag',),
+            bases=("taggit.tag",),
         ),
         migrations.CreateModel(
-            name='InventoryTaggedItem',
-            fields=[
-            ],
+            name="InventoryTaggedItem",
+            fields=[],
             options={
-                'verbose_name': 'Tagged Item',
-                'verbose_name_plural': 'Tagged Items',
-                'proxy': True,
-                'indexes': [],
-                'constraints': [],
+                "verbose_name": "Tagged Item",
+                "verbose_name_plural": "Tagged Items",
+                "proxy": True,
+                "indexes": [],
+                "constraints": [],
             },
-            bases=('taggit.taggeditem',),
+            bases=("taggit.taggeditem",),
         ),
     ]

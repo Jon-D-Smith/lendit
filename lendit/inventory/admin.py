@@ -1,22 +1,20 @@
 from django.contrib import admin
 from django.utils.html import format_html
-
 from django_summernote.admin import SummernoteModelAdmin
 from taggit.admin import TagAdmin
-from taggit.models import Tag, TaggedItem
+from taggit.models import Tag
 
-from .models import Item, BorrowEvent, InventoryTag, InventoryTaggedItem
 from .forms import ItemAdminForm
+from .models import BorrowEvent, InventoryTag, InventoryTaggedItem, Item
 
 
 # Setting up the borrow event to be placeable inside the ItemAdmin view
 class BorrowEventInline(admin.TabularInline):
     model = BorrowEvent
     extra = 0
-    readonly_fields = ('user', 'borrowed_at', 'returned_at')
+    readonly_fields = ("user", "borrowed_at", "returned_at")
     verbose_name = "Transaction"
     verbose_name_plural = "Transactions"
-
 
 
 @admin.register(Item)
@@ -24,42 +22,107 @@ class ItemAdmin(SummernoteModelAdmin):
     form = ItemAdminForm
     show_facets = admin.ShowFacets.ALWAYS
 
-    summernote_fields = ('description',)
+    summernote_fields = ("description",)
 
     inlines = [BorrowEventInline]
-    actions=["set_status_available", "set_status_lost", "set_status_needs_repair", "set_status_needs_replacing", "set_status_pending_checkin"]
+    actions = [
+        "set_status_available",
+        "set_status_lost",
+        "set_status_needs_repair",
+        "set_status_needs_replacing",
+        "set_status_pending_checkin",
+        "set_hide_true",
+        "set_hide_false",
+    ]
 
-    list_display = ['name', 'status','display_tags', 'replacement_link', 'price', 'borrower', 'is_hidden']
-    list_filter = ['status', 'tags', 'is_hidden']
-    search_fields = ['name',  'status', 'borrower__email', 'borrower__first_name', 'borrower__last_name', 'tags__name']
-    ordering = ['name', 'status', 'tags', 'created_at', 'updated_at', 'last_borrowed_at', 'checked_in_at']
+    list_display = [
+        "name",
+        "status",
+        "display_tags",
+        "replacement_link",
+        "price",
+        "borrower",
+        "is_hidden",
+    ]
+    list_filter = ["status", "tags", "is_hidden"]
+    search_fields = [
+        "name",
+        "status",
+        "borrower__email",
+        "borrower__first_name",
+        "borrower__last_name",
+        "tags__name",
+    ]
+    ordering = ["name", "status"]
 
-    readonly_fields = ('created_at', 'updated_at', 'last_borrowed_at', 'checked_in_at', 'image_preview')
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+        "last_borrowed_at",
+        "checked_in_at",
+        "image_preview",
+    )
 
+    # region Field overrides
     # Overriding the get_fieldsets to split the detail and add views
     def get_fieldsets(self, request, obj=None):
         # If the item already exists, render these fields
         if obj:
             return (
-                    ('Item Details', {
-                        'classes' : ('wide',),
-                        'fields': ('name', 'image_preview', 'image', 'price', 'description' , 'replacement_link', 'tags', )
-                        }),
-                    ('Item Status', {
-                        'classes' : ('wide',),
-                        'fields': ('status', 'is_hidden', 'borrower')
-                        }),
-                    ('Important Dates', {
-                        'classes' : ('collapse',),
-                        'fields': ('created_at', 'updated_at', 'last_borrowed_at', 'checked_in_at')
-                        }),
-                    )
+                (
+                    "Item Details",
+                    {
+                        "classes": ("wide",),
+                        "fields": (
+                            "name",
+                            "image_preview",
+                            "image",
+                            "price",
+                            "description",
+                            "replacement_link",
+                            "tags",
+                        ),
+                    },
+                ),
+                (
+                    "Item Status",
+                    {
+                        "classes": ("wide",),
+                        "fields": ("status", "is_hidden", "borrower"),
+                    },
+                ),
+                (
+                    "Important Dates",
+                    {
+                        "classes": ("collapse",),
+                        "fields": (
+                            "created_at",
+                            "updated_at",
+                            "last_borrowed_at",
+                            "checked_in_at",
+                        ),
+                    },
+                ),
+            )
         # If the item does not exist we are making it. Render the add item form
-        else:
-            return (None, {
-            'classes': ('wide',),
-            'fields': ('name', 'image', 'price', 'description', 'replacement_link',  'tags', 'status', 'is_hidden'),
-        }),
+        return (
+            (
+                None,
+                {
+                    "classes": ("wide",),
+                    "fields": (
+                        "name",
+                        "image",
+                        "price",
+                        "description",
+                        "replacement_link",
+                        "tags",
+                        "status",
+                        "is_hidden",
+                    ),
+                },
+            ),
+        )
 
     # Only return readonly fields for the detail view
     def get_readonly_fields(self, request, obj=None):
@@ -70,18 +133,19 @@ class ItemAdmin(SummernoteModelAdmin):
     # Render the image in the the admin detail view
     def image_preview(self, item):
         if item.image:
-            return format_html('<img src="{}" style="max-height: 200px;" />', item.image.url)
+            return format_html(
+                '<img src="{}" style="max-height: 200px;" />', item.image.url
+            )
         return "No image"
-    
+
     # display tags as a list in the listview
     def display_tags(self, obj):
         return ", ".join(o.name for o in obj.tags.all())
-    
 
+    # endregion
 
-
-    #region Admin Acitons
-    @admin.action(description="Set Item status to available")
+    # region Admin Actions
+    @admin.action(description="Checkin Item(s)")
     def set_status_available(self, request, queryset):
         queryset.update(status=Item.Status.AVAILABLE)
 
@@ -98,7 +162,7 @@ class ItemAdmin(SummernoteModelAdmin):
         queryset.update(status=Item.Status.REPAIR)
 
         self.message_user(request, "Success! Item(s) status set to needs repair.")
-        
+
     @admin.action(description="Set Item status to needs replacing")
     def set_status_needs_replacing(self, request, queryset):
         queryset.update(status=Item.Status.REPLACE)
@@ -111,24 +175,52 @@ class ItemAdmin(SummernoteModelAdmin):
 
         self.message_user(request, "Success! Item(s) status set to pending checkin.")
 
-    #endregion
+    @admin.action(description="Hide Items")
+    def set_hide_true(self, request, queryset):
+        queryset.update(is_hidden=True)
 
-    display_tags.short_description = 'Tags'
-    image_preview.short_description = 'Preview'
+        self.message_user(request, "Success! Item(s) hidden.")
+
+    @admin.action(description="Unhide Items")
+    def set_hide_false(self, request, queryset):
+        queryset.update(is_hidden=False)
+
+        self.message_user(request, "Success! Item(s) unhidden.")
+
+    @admin.action(description="-----------")
+    def set_linebreak(self, request, queryset):
+        pass
+
+    # endregion
+
+    display_tags.short_description = "Tags"
+    image_preview.short_description = "Preview"
+
+
+# register Tag fields
+# (Model proxies to keep them tied to the item object in the admin interface)
+
 
 @admin.register(InventoryTag)
 class InventoryTagAdmin(TagAdmin):
-    fieldsets = (
-        ('Tag Info', {'fields': ('name','slug')}),
-    )
+    fieldsets = (("Tag Info", {"fields": ("name", "slug")}),)
+
     # Override the inline instances so it doesn't load the related tagged items
     def get_inline_instances(self, request, obj=None):
         return []
 
-# @admin.register(InventoryTaggedItem)
-# class InventoryTaggedItemAdmin(admin.ModelAdmin):
-#     list_display = ['tag', 'content_type', 'object_id']
 
+@admin.register(InventoryTaggedItem)
+class InventoryTaggedItemAdmin(admin.ModelAdmin):
+    list_display = ["tag", "content_type", "object_id", "related_object"]
+
+    def related_object(self, obj):
+        return obj.content_object
+
+    related_object.short_description = "Tagged Item"
+
+
+# endregion
 
 admin.site.register(BorrowEvent)
 

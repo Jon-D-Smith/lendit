@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% block title %}Inventory{% endblock title %}
+{% block content %}
+
+
+
+    <div class="search-fields d-flex mt-3 justify-content-start col-5">
+        <input class='mx-3 form-control' type="text" id="search-box" placeholder='Search...'>
+        <select id="tag-filter" class="form-select">
+            <option value="">--- All Tags ---</option>
+        </select>
+    </div>
+    <div id="item-container" class="d-flex justify-content-start" style="margin-top: 5rem;"></div>
+    <div id="pagination" class="container align-self-end"></div>
+
+<script>
+    let allItems = []
+    let filteredItems = []
+    let currentPage = 1
+    let pageSize = 12
+
+    function renderItems() {
+        const itemContainer = document.getElementById('item-container')
+        itemContainer.innerHTML = ''
+
+        const start = (currentPage - 1) * pageSize
+        const end = start + pageSize
+
+        filteredItems.slice(start, end).forEach(item => {
+            const itemLink = document.createElement('a')
+            itemLink.setAttribute('href', "{% url 'admin:index' %}")
+            itemLink.style.textDecoration = "none"
+
+            const itemCard = document.createElement("div")
+            itemCard.classList.add('card', 'd-flex', 'flex-column', 'mx-3', 'my-3', 'justify-content-between')
+            itemCard.style.width = '17rem'
+            itemCard.style.height = '13rem'
+            itemCard.style.overflow = 'hidden'
+
+            const itemImage = document.createElement("img")
+            itemImage.src = item.image
+            itemImage.style.height = '100px'
+            itemImage.style.objectFit = 'cover'
+            
+            const cardBody = document.createElement("div")
+            cardBody.classList.add('card-body', 'd-flex', 'flex-column', 'justify-content-center')
+            
+            const itemName = document.createElement("h3")
+            itemName.classList.add("card-title")
+            itemName.innerHTML = `${item.name}`
+
+            const itemTags = document.createElement("p")
+            for (const tag of item.tags) {
+                const tagDiv = document.createElement('div')
+                tagDiv.classList.add('badge', 'bg-primary')
+                tagDiv.innerHTML += tag
+                tagDiv.style.marginRight = '0.5rem'
+                itemTags.appendChild(tagDiv)
+            }
+
+            itemContainer.appendChild(itemLink)
+            itemLink.appendChild(itemCard)
+            itemCard.appendChild(itemImage)
+            itemCard.appendChild(cardBody)
+            cardBody.appendChild(itemName)
+            cardBody.appendChild(itemTags)
+        })
+
+        renderPagination()
+    }
+
+    function renderPagination() {
+        const pagination = document.getElementById('pagination')
+        pagination.innerHTML = ''
+
+        const totalPages = Math.ceil(filteredItems.length / pageSize)
+
+        if (totalPages <= 1) {
+            pagination.classList.add('d-none')
+            return
+        }
+
+        pagination.classList.remove('d-none')
+
+        for (let i = 1; i <= totalPages; i++) {
+            const btn = document.createElement('button')
+            btn.classList.add('btn', 'btn-primary', 'mx-1')
+            btn.innerText = i
+            btn.disabled = i === currentPage
+            btn.addEventListener('click', () => {
+                currentPage = i
+                renderItems()
+            })
+            pagination.appendChild(btn)
+        }
+    }
+
+    function applyFilters() {
+        const searchTerm = document.getElementById('search-box').value.toLowerCase()
+        const selectedTag = document.getElementById('tag-filter').value
+
+        filteredItems = allItems.filter(item => {
+            const matchesSearch = item.name.toLowerCase().includes(searchTerm)
+            const matchesTag = selectedTag === '' || item.tags.includes(selectedTag)
+            return matchesSearch && matchesTag
+        })
+
+        currentPage = 1
+        renderItems()
+    }
+
+    function populateTagfilter() {
+        const tagSet = new Set()
+        allItems.forEach(item => {
+            item.tags.forEach(tag => tagSet.add(tag))
+        })
+
+        const tagFilter = document.getElementById('tag-filter')
+        tagSet.forEach(tag => {
+            const option = document.createElement('option')
+            option.value = tag
+            option.innerText = tag
+            tagFilter.appendChild(option)
+        })
+    }
+
+
+    fetch('{% url "inventory:items_json_list"%}')
+        .then(response => response.json())
+        .then(data => {
+            console.log("Fetched data:", data)
+            allItems = data.items
+            filteredItems = [...allItems]
+            populateTagfilter()
+            renderItems()
+        })
+
+    document.getElementById('search-box').addEventListener('input', applyFilters)
+    document.getElementById('tag-filter').addEventListener('change', applyFilters)
+</script>
+{% endblock %}

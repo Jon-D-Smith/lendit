@@ -4,14 +4,16 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('inventory', '0005_alter_item_image'),
+        ("inventory", "0005_alter_item_image"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='borrowevent',
-            options={'verbose_name': 'Transaction', 'verbose_name_plural': 'Transactions'},
+            name="borrowevent",
+            options={
+                "verbose_name": "Transaction",
+                "verbose_name_plural": "Transactions",
+            },
         ),
     ]

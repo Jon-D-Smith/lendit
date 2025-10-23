@@ -4,15 +4,14 @@ from django.db import migrations
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
-        ('inventory', '0002_item_checked_in_item_created_at_and_more'),
+        ("inventory", "0002_item_checked_in_item_created_at_and_more"),
     ]
 
     operations = [
         migrations.RenameField(
-            model_name='item',
-            old_name='checked_in',
-            new_name='checked_in_at',
+            model_name="item",
+            old_name="checked_in",
+            new_name="checked_in_at",
         ),
     ]
