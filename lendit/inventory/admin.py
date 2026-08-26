@@ -31,6 +31,7 @@ class ItemAdmin(SummernoteModelAdmin):
         "set_status_needs_repair",
         "set_status_needs_replacing",
         "set_status_pending_checkin",
+        "set_status_reserved",
         "set_hide_true",
         "set_hide_false",
     ]
@@ -133,9 +134,7 @@ class ItemAdmin(SummernoteModelAdmin):
     # Render the image in the the admin detail view
     def image_preview(self, item):
         if item.image:
-            return format_html(
-                '<img src="{}" style="max-height: 200px;" />', item.image.url
-            )
+            return format_html('<img src="{}" style="max-height: 200px;" />', item.image.url)
         return "No image"
 
     # display tags as a list in the listview
@@ -174,6 +173,11 @@ class ItemAdmin(SummernoteModelAdmin):
         queryset.update(status=Item.Status.PENDING)
 
         self.message_user(request, "Success! Item(s) status set to pending checkin.")
+
+    @admin.action(description="Set Item status to reserved")
+    def set_status_reserved(self, request, queryset):
+        queryset.update(status=Item.Status.RESERVED)
+        self.message_user(request, "Success! Item(s) reserved.")
 
     @admin.action(description="Hide Items")
     def set_hide_true(self, request, queryset):

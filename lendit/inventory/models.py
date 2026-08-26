@@ -17,20 +17,17 @@ class Item(models.Model):
         REPAIR = "nr", "Needs Repair"
         REPLACE = "re", "Needs Replacing"
         PENDING = "pc", "Pending Checkin"
+        RESERVED = "rs", "Reserved"
 
     name = models.CharField(max_length=250)
-    image = models.ImageField(
-        upload_to="media/item_images/", default="media/default.jpg"
-    )
+    image = models.ImageField(upload_to="media/item_images/", default="media/default.jpg")
     description = models.TextField(blank=True, null=True)
     replacement_link = models.URLField(max_length=2000, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
     tags = TaggableManager()
     status = models.CharField(max_length=3, choices=Status, default=Status.AVAILABLE)
     is_hidden = models.BooleanField(default=False)
-    borrower = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True
-    )
+    borrower = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, blank=True, null=True)
     last_borrowed_at = models.DateTimeField(blank=True, null=True)
     checked_in_at = models.DateTimeField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -44,12 +41,8 @@ class Item(models.Model):
 
 
 class BorrowEvent(models.Model):
-    item = models.ForeignKey(
-        "Item", on_delete=models.CASCADE, related_name="borrow_events"
-    )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True
-    )
+    item = models.ForeignKey("Item", on_delete=models.CASCADE, related_name="borrow_events")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     borrowed_at = models.DateTimeField(default=timezone.now)
     returned_at = models.DateTimeField(blank=True, null=True)
 

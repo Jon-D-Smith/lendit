@@ -65,7 +65,8 @@ db.sqlite3-journal
 lendit/db.sqlite3
 lendit/lendit/__pycache__
 lendit/accounts/__pycache__
-
+lendit/media
+lendit/staticfiles
 
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm

@@ -43,7 +43,7 @@ def setup_superuser(request):
             login(request, user)
             messages.success(request, "Administrative account created successfully!")
             return redirect("admin:index")
-        
+
         # Kind of clunky but it works for validation errors with bootstrap
         bootstrap_class_error_handling(form)
         return render(request, "accounts/setup_superuser.html", {"form": form})

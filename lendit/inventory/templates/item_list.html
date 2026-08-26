@@ -2,140 +2,196 @@
 {% block title %}Inventory{% endblock title %}
 {% block content %}
 
+<div 
+    x-data="inventoryPage()" 
+    x-init="init()" 
+    class="container mt-4">
 
+    <!-- Search & Filter -->
+    <div class="search-fields d-flex mt-3 justify-content-start col-8">
+        <input 
+            class="mx-3 form-control" 
+            type="text" 
+            placeholder="Search..."
+            x-model="searchTerm"
+            @input="applyFilters">
+        <select 
+            class="form-select"
+            x-model="selectedTag"
+            @change="applyFilters">
 
-    <div class="search-fields d-flex mt-3 justify-content-start col-5">
-        <input class='mx-3 form-control' type="text" id="search-box" placeholder='Search...'>
-        <select id="tag-filter" class="form-select">
             <option value="">--- All Tags ---</option>
+            <template x-for="tag in tags" :key="tag">
+                <option x-text="tag" :value="tag"></option>
+            </template>
         </select>
+        <button 
+            class="btn btn-primary mx-3 flex-shrink-0"
+            @click="clearFilters"
+            >Clear Filters
+        </button>
     </div>
-    <div id="item-container" class="d-flex justify-content-start" style="margin-top: 5rem;"></div>
-    <div id="pagination" class="container align-self-end"></div>
 
+    <!-- Loading Spinner -->
+    <template x-if="loading">
+        <div class="d-flex justify-content-center align-items-center mt-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    </template>
+
+    <!-- Error Message -->
+    <template x-if="error">
+        <div class="alert alert-danger text-center mt-5" x-text="error"></div>
+    </template>
+
+    <!-- No Items Found -->
+    <div 
+        class="text-center text-muted mt-5"
+        x-show="!loading && !error && filteredItems.length === 0"
+        x-transition>
+        <h5>No items found.</h5>
+    </div>
+
+    <!-- Items Grid -->
+    <div 
+        id="item-container" 
+        class="d-flex flex-wrap justify-content-start mt-5"
+        x-show="!loading && !error && filteredItems.length > 0"
+        x-transition>
+        <template x-for="item in paginatedItems" :key="item.name">
+            <a 
+                :href="'{% url 'admin:index' %}'"
+                class="text-decoration-none">
+
+                <div 
+                    class="card d-flex flex-column mx-3 my-3 justify-content-between shadow"
+                    style="width: 17rem; height: 13rem; overflow: hidden;"
+                    @mouseenter="$el.classList.add('border-white')"
+                    @mouseleave="$el.classList.remove('border-white')">
+
+                    <img 
+                        :src="item.image" 
+                        class="card-img-top"
+                        style="height: 100px; object-fit: cover;">
+
+                    <div class="card-body d-flex flex-column justify-content-center">
+                        <h3 class="card-title" x-text="item.name"></h3>
+                        <p>
+                            <!-- Tags in card -->
+                            <template x-for="tag in item.tags" :key="tag">
+                                <span 
+                                    class="badge bg-primary me-1" 
+                                    x-text="tag"
+                                    :class="hoveredTag === tag ? 'bg-success' : 'bg-primary'"
+                                    @click.prevent.stop="filterByTag(tag)"
+                                    @mouseenter="hoveredTag = tag"
+                                    @mouseleave="hoveredTag = null"
+                                    title="Filter by tag"
+                                    ></span>
+                            </template>
+                        </p>
+                    </div>
+                </div>
+            </a>
+        </template>
+    </div>
+
+    <!-- Pagination UI -->
+    <div 
+        id="pagination" 
+        class="container align-self-end mt-3"
+        x-show="!loading && !error && totalPages > 1">
+
+        <template x-for="page in totalPages" :key="page">
+            <button 
+                class="btn btn-primary mx-1"
+                :class="{'disabled': page === currentPage}"
+                @click="currentPage = page"
+                x-text="page"></button>
+        </template>
+    </div>
+</div>
+
+<!-- Alpine Component -->
 <script>
-    let allItems = []
-    let filteredItems = []
-    let currentPage = 1
-    let pageSize = 12
+function inventoryPage() {
+    return {
+        allItems: [],
+        filteredItems: [],
+        tags: [],
+        searchTerm: '',
+        selectedTag: '',
+        hoveredTag: null,
+        currentPage: 1,
+        pageSize: 2,
+        loading: true,
+        error: null,
 
-    function renderItems() {
-        const itemContainer = document.getElementById('item-container')
-        itemContainer.innerHTML = ''
+        async init() {
+            this.loading = true;
+            this.error = null;
 
-        const start = (currentPage - 1) * pageSize
-        const end = start + pageSize
+            try {
+                const url = "{% url 'inventory:items_json_list' %}";
+                const response = await fetch(url);
 
-        filteredItems.slice(start, end).forEach(item => {
-            const itemLink = document.createElement('a')
-            itemLink.setAttribute('href', "{% url 'admin:index' %}")
-            itemLink.style.textDecoration = "none"
+                if (!response.ok) {
+                    throw new Error(`Failed to load items: ${response.status}`);
+                }
 
-            const itemCard = document.createElement("div")
-            itemCard.classList.add('card', 'd-flex', 'flex-column', 'mx-3', 'my-3', 'justify-content-between')
-            itemCard.style.width = '17rem'
-            itemCard.style.height = '13rem'
-            itemCard.style.overflow = 'hidden'
+                const data = await response.json();
 
-            const itemImage = document.createElement("img")
-            itemImage.src = item.image
-            itemImage.style.height = '100px'
-            itemImage.style.objectFit = 'cover'
-            
-            const cardBody = document.createElement("div")
-            cardBody.classList.add('card-body', 'd-flex', 'flex-column', 'justify-content-center')
-            
-            const itemName = document.createElement("h3")
-            itemName.classList.add("card-title")
-            itemName.innerHTML = `${item.name}`
+                if (!data.items || !Array.isArray(data.items)) {
+                    throw new Error("Invalid data format from server.");
+                }
 
-            const itemTags = document.createElement("p")
-            for (const tag of item.tags) {
-                const tagDiv = document.createElement('div')
-                tagDiv.classList.add('badge', 'bg-primary')
-                tagDiv.innerHTML += tag
-                tagDiv.style.marginRight = '0.5rem'
-                itemTags.appendChild(tagDiv)
+                this.allItems = data.items;
+                this.filteredItems = [...this.allItems];
+                this.tags = [...new Set(this.allItems.flatMap(item => item.tags))];
+
+            } catch (err) {
+                console.error("Fetch error:", err);
+                this.error = err.message || "Unable to load inventory data.";
+            } finally {
+                this.loading = false;
             }
+        },
 
-            itemContainer.appendChild(itemLink)
-            itemLink.appendChild(itemCard)
-            itemCard.appendChild(itemImage)
-            itemCard.appendChild(cardBody)
-            cardBody.appendChild(itemName)
-            cardBody.appendChild(itemTags)
-        })
+        get totalPages() {
+            return Math.ceil(this.filteredItems.length / this.pageSize);
+        },
 
-        renderPagination()
+        get paginatedItems() {
+            const start = (this.currentPage - 1) * this.pageSize;
+            return this.filteredItems.slice(start, start + this.pageSize);
+        },
+
+        applyFilters() {
+            const term = this.searchTerm.toLowerCase();
+            const tag = this.selectedTag;
+
+            this.filteredItems = this.allItems.filter(item => {
+                const matchesSearch = item.name.toLowerCase().includes(term);
+                const matchesTag = tag === '' || item.tags.includes(tag);
+                return matchesSearch && matchesTag;
+            });
+
+            this.currentPage = 1;
+        },
+        clearFilters() {
+            this.searchTerm = "";
+            this.selectedTag = "";
+            this.applyFilters();
+        },
+
+        filterByTag(tag) {
+            this.selectedTag = tag;
+            this.applyFilters();
+}
     }
-
-    function renderPagination() {
-        const pagination = document.getElementById('pagination')
-        pagination.innerHTML = ''
-
-        const totalPages = Math.ceil(filteredItems.length / pageSize)
-
-        if (totalPages <= 1) {
-            pagination.classList.add('d-none')
-            return
-        }
-
-        pagination.classList.remove('d-none')
-
-        for (let i = 1; i <= totalPages; i++) {
-            const btn = document.createElement('button')
-            btn.classList.add('btn', 'btn-primary', 'mx-1')
-            btn.innerText = i
-            btn.disabled = i === currentPage
-            btn.addEventListener('click', () => {
-                currentPage = i
-                renderItems()
-            })
-            pagination.appendChild(btn)
-        }
-    }
-
-    function applyFilters() {
-        const searchTerm = document.getElementById('search-box').value.toLowerCase()
-        const selectedTag = document.getElementById('tag-filter').value
-
-        filteredItems = allItems.filter(item => {
-            const matchesSearch = item.name.toLowerCase().includes(searchTerm)
-            const matchesTag = selectedTag === '' || item.tags.includes(selectedTag)
-            return matchesSearch && matchesTag
-        })
-
-        currentPage = 1
-        renderItems()
-    }
-
-    function populateTagfilter() {
-        const tagSet = new Set()
-        allItems.forEach(item => {
-            item.tags.forEach(tag => tagSet.add(tag))
-        })
-
-        const tagFilter = document.getElementById('tag-filter')
-        tagSet.forEach(tag => {
-            const option = document.createElement('option')
-            option.value = tag
-            option.innerText = tag
-            tagFilter.appendChild(option)
-        })
-    }
-
-
-    fetch('{% url "inventory:items_json_list"%}')
-        .then(response => response.json())
-        .then(data => {
-            console.log("Fetched data:", data)
-            allItems = data.items
-            filteredItems = [...allItems]
-            populateTagfilter()
-            renderItems()
-        })
-
-    document.getElementById('search-box').addEventListener('input', applyFilters)
-    document.getElementById('tag-filter').addEventListener('change', applyFilters)
+}
 </script>
+
 {% endblock %}

@@ -5,9 +5,7 @@ from .models import Item
 
 
 class ItemAdminForm(forms.ModelForm):
-    tags = forms.ModelMultipleChoiceField(
-        required=False, queryset=Tag.objects.all(), widget=forms.CheckboxSelectMultiple
-    )
+    tags = forms.ModelMultipleChoiceField(required=False, queryset=Tag.objects.all(), widget=forms.CheckboxSelectMultiple)
 
     class Meta:
         model = Item
