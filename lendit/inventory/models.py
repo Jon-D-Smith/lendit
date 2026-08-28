@@ -20,7 +20,7 @@ class Item(models.Model):
         RESERVED = "rs", "Reserved"
 
     name = models.CharField(max_length=250)
-    image = models.ImageField(upload_to="media/item_images/", default="media/default.jpg")
+    image = models.ImageField(upload_to="item_images/", default="default.jpg")
     description = models.TextField(blank=True, null=True)
     replacement_link = models.URLField(max_length=2000, blank=True, null=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
@@ -37,7 +37,7 @@ class Item(models.Model):
         return self.name
 
     def get_absolute_url(self):
-        return reverse("item-detail", kwargs={"pk": self.pk})
+        return reverse("inventory:item_detail", kwargs={"pk": self.pk})
 
 
 class BorrowEvent(models.Model):
